@@ -132,7 +132,11 @@ class JobManager:
 
         return result["id"]
 
-    async def fetch_job(self, queues: Iterable[str] | None) -> jobs.Job | None:
+    async def fetch_job(
+        self,
+        queues: Iterable[str] | None = None,
+        job_id: int | None = None,
+    ) -> jobs.Job | None:
         """
         Select a job in the queue, and mark it as doing.
         The worker selecting a job is then responsible for running it, and then
@@ -142,6 +146,8 @@ class JobManager:
         ----------
         queues:
             Filter by job queue names
+        job_id:
+            If provided, fetch this specific job ID instead of the next available job
 
         Returns
         -------
@@ -149,11 +155,16 @@ class JobManager:
             None if no suitable job was found. The job otherwise.
         """
 
-        row = await self.connector.execute_query_one_async(
-            query=sql.queries["fetch_job"], queues=queues
-        )
+        if job_id is not None:
+            row = await self.connector.execute_query_one_async(
+                query=sql.queries["fetch_job_by_id"], job_id=job_id
+            )
+        else:
+            row = await self.connector.execute_query_one_async(
+                query=sql.queries["fetch_job"], queues=queues
+            )
 
-        # fetch_tasks will always return a row, but is there's no relevant
+        # fetch_tasks will always return a row, but if there's no relevant
         # value, it will all be None
         if row["id"] is None:
             return None

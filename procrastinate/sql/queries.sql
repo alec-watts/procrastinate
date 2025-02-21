@@ -17,6 +17,11 @@ SELECT procrastinate_defer_periodic_job_v1(%(queue)s, %(lock)s, %(queueing_lock)
 SELECT id, status, task_name, priority, lock, queueing_lock, args, scheduled_at, queue_name, attempts
     FROM procrastinate_fetch_job_v1(%(queues)s::varchar[]);
 
+-- fetch_job_by_id --
+-- Get a job by its ID
+SELECT id, status, task_name, priority, lock, queueing_lock, args, scheduled_at, queue_name, attempts
+    FROM procrastinate_fetch_job_by_id_v1(%(job_id)s);
+
 -- select_stalled_jobs --
 -- Get running jobs that started more than a given time ago
 SELECT job.id, status, task_name, priority, lock, queueing_lock,
