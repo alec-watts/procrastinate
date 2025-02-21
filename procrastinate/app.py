@@ -24,6 +24,7 @@ logger = logging.getLogger(__name__)
 
 class WorkerOptions(TypedDict):
     queues: NotRequired[Iterable[str]]
+    job_id: NotRequired[int]
     name: NotRequired[str]
     concurrency: NotRequired[int]
     wait: NotRequired[bool]

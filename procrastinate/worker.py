@@ -35,6 +35,7 @@ class Worker:
         self,
         app: app.App,
         queues: Iterable[str] | None = None,
+        job_id: int | None = None,
         name: str | None = WORKER_NAME,
         concurrency: int = WORKER_CONCURRENCY,
         wait: bool = True,
@@ -45,10 +46,10 @@ class Worker:
         delete_jobs: str | jobs.DeleteJobCondition | None = None,
         additional_context: dict[str, Any] | None = None,
         install_signal_handlers: bool = True,
-        job_id: int | None = None,
     ):
         self.app = app
         self.queues = queues
+        self.job_id = job_id
         self.worker_name = name
         self.concurrency = concurrency
         self.wait = wait
@@ -62,8 +63,7 @@ class Worker:
         ) or jobs.DeleteJobCondition.NEVER
         self.additional_context = additional_context
         self.install_signal_handlers = install_signal_handlers
-        self.job_id = job_id
-        
+
         if self.worker_name:
             self.logger = logger.getChild(self.worker_name)
         else:
