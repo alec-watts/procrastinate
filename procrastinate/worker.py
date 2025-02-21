@@ -332,7 +332,6 @@ class Worker:
                                 job_result=None,
                             ),
                         )
-                    self.stop()
                 else:
                     job = await self.app.job_manager.fetch_job(queues=self.queues)
             finally:
