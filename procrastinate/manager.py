@@ -164,7 +164,7 @@ class JobManager:
                 query=sql.queries["fetch_job"], queues=queues
             )
 
-        # fetch_tasks will always return a row, but if there's no relevant
+        # fetch_tasks will always return a row, but is there's no relevant
         # value, it will all be None
         if row["id"] is None:
             return None
