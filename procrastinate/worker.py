@@ -45,6 +45,7 @@ class Worker:
         delete_jobs: str | jobs.DeleteJobCondition | None = None,
         additional_context: dict[str, Any] | None = None,
         install_signal_handlers: bool = True,
+        job_id: int | None = None,
     ):
         self.app = app
         self.queues = queues
@@ -61,7 +62,8 @@ class Worker:
         ) or jobs.DeleteJobCondition.NEVER
         self.additional_context = additional_context
         self.install_signal_handlers = install_signal_handlers
-
+        self.job_id = job_id
+        
         if self.worker_name:
             self.logger = logger.getChild(self.worker_name)
         else:
@@ -318,7 +320,21 @@ class Worker:
                 await utils.wait_any(acquire_sem_task, self._stop_event.wait())
                 if self._stop_event.is_set():
                     break
-                job = await self.app.job_manager.fetch_job(queues=self.queues)
+
+                if self.job_id is not None:
+                    job = await self.app.job_manager.fetch_job(job_id=self.job_id)
+                    if not job:
+                        self.logger.info(
+                            f"Job {self.job_id} not found or not available",
+                            extra=self._log_extra(
+                                context=None,
+                                action="job_not_found",
+                                job_result=None,
+                            ),
+                        )
+                    self.stop()
+                else:
+                    job = await self.app.job_manager.fetch_job(queues=self.queues)
             finally:
                 if (not job or self._stop_event.is_set()) and acquire_sem_task.done():
                     self._job_semaphore.release()
